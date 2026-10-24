@@ -15,8 +15,8 @@ jobs:
         run: docker cp builder:${{ steps:build:outputs:filename }} ${{ steps:build:outputs:filename }}
       - name: Upload patch
         uses: actions/upload-artifact@v7
-          with:
-            name: ${{ steps:build:outputs:filename }}
-            path: ${{ steps:build:outputs:filename }}
-            compression-level: 0
+        with:
+          name: ${{ steps:build:outputs:filename }}
+          path: ${{ steps:build:outputs:filename }}
+          compression-level: 0
 
