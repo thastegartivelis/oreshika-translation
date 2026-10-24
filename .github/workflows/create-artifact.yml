@@ -1,0 +1,13 @@
+name: Build patch
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run the Docker build
+        run: docker run --name builder thastegartivelis/oreshika-builder
+
