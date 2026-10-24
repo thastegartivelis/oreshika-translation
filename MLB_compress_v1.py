@@ -51,6 +51,19 @@ for entry in os.listdir('data'):
                 datfile.close()
                 os.remove(datfname)
                 os.rename(fileName, os.path.join('data', entry, 'Compressed', fileName))
+        for file in os.listdir(os.path.join('data', entry, 'Raw')):
+            if file.endswith('_new.mlb'):
+                datfname = os.path.join('data', entry, 'Raw', file)
+                fSize = os.path.getsize(datfname)
+                datfile = open(datfname, 'rb')
+                fileName = file.replace('_new', '')
+                dumpfile = open(fileName, 'wb')
+                data = datfile.read(fSize)
+                dumpfile.write(data)
+                dumpfile.close()
+                datfile.close()
+                os.remove(datfname)
+                os.rename(fileName, os.path.join('data', entry, 'Compressed', fileName))
 
 dTestTime = time.time() - dStartTime
 print()

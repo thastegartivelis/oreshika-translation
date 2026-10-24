@@ -4,6 +4,8 @@ Original game
 Rebuilt game
 *.txt
 *.csv
+!umd_layout.csv
 blueprint*
 output/
 umdgenc.exe
+*.iso

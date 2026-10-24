@@ -22,6 +22,9 @@ with codecs.open('translations.csv', 'r') as file:
         translateFiles.add(file)
 
 for folder in translateFolders:
+    # MLB_0025.mlb is stored directly under data/, not in an EZBIND archive.
+    if folder == 'None':
+        continue
     file = folder + '.arc'
     if file.endswith('.arc') and not file.endswith('_new.arc'):
         dTestTime = 0.0

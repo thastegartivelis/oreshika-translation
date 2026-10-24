@@ -6,7 +6,7 @@ dStartTime = time.time()
 fileListTrack = 'Oreshika_File_List.csv'
 fListTrack = open(fileListTrack, 'w+')
 
-fListTrack.write("Folder, File Name, Compressed, Uncompressed \n")
+fListTrack.write("Folder, File Name, Compressed, Uncompressed, Raw \n")
 
 
 fDir = os.getcwd() + '/data'
@@ -81,6 +81,15 @@ for i in os.listdir(fDir):
             os.mkdir(dumpdir1)
         except WindowsError: pass
 
+        dumpdir2 = os.path.splitext(os.path.basename(datfname))[0] + '/Raw'
+        dumpdir2 = os.path.join(scriptdir, dumpdir2)
+
+        print(dumpdir2)
+
+        try:
+            os.mkdir(dumpdir2)
+        except WindowsError: pass
+
         # Dump Files
         print()
         print("Dumping Files:")
@@ -110,6 +119,7 @@ for i in os.listdir(fDir):
                 print(header[0], header[1], header[2], header[3])
                 print(header[0] == b'\x1F')
 
+                # gzip header check
                 if (header[0:1] == b'\x1F' and header[1:2] == b'\x8B' and header[2:3] == b'\x09' and header[3:4] == b'\x00'):
                     print('writing')
             
@@ -123,13 +133,18 @@ for i in os.listdir(fDir):
 
                     dumpfile.close()
 
-                    fListTrack.write(EZBIND_Name + "," + fName + ",1,1 \n")
+                    fListTrack.write(EZBIND_Name + "," + fName + ",1,1,0 \n")
 
                 else:
-                    fListTrack.write(EZBIND_Name + "," + fName + ",1,0 \n")
+                    print('writing raw')
+                    tempdir = os.path.join(dumpdir2, fName)
+                    dumpfile = open(tempdir, 'wb')
+                    dumpfile.write(data)
+                    dumpfile.close()
+                    fListTrack.write(EZBIND_Name + "," + fName + ",1,0,1 \n")
                     
             else:
-                    fListTrack.write(EZBIND_Name + "," + fName + ",1,0 \n")
+                    fListTrack.write(EZBIND_Name + "," + fName + ",1,0,0 \n")
 
                     
         datfile.close()

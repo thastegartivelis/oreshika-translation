@@ -31,14 +31,18 @@ for i in range(fnum+1):
     fentries.append([fCRC, fOffset, fPointer])
 
 
-# Get file list and sort it based on filenumber
+# Get file list and sort it based on filenumber. The data.ore offset table
+# masks offsets to 0x7ffff800, so every packed entry must start on a 0x800
+# boundary. Keep both the real size and aligned extent size for each entry.
 sortedList = []
+dataAlignment = 0x800
 
 for i in os.listdir(fDir):
     if os.path.isfile(os.path.join(fDir, i)):
         numFile = i.split("_")[1].split(".")[0]
         fileSize = os.path.getsize(fDir + '/'+ i)
-        sortedList.append([numFile, i, fileSize])
+        alignedSize = (fileSize + dataAlignment - 1) & ~(dataAlignment - 1)
+        sortedList.append([numFile, i, fileSize, alignedSize])
 
 sortedList.sort()
 
@@ -66,7 +70,7 @@ for i in range(len(fentries)-1):
     dumpfile.write(fileOffset[2:3])
     dumpfile.write(fileOffset[3:4])
 
-    fOffset = fOffset + sortedList[i][2]
+    fOffset = fOffset + sortedList[i][3]
 
 # Run last case in file    
 i = i+1
@@ -89,13 +93,14 @@ for i in range(1800):
 
 # Read and write out data in the file.
 for entry in sortedList:
-    numFile, nameFile, sizeFile = entry
+    numFile, nameFile, sizeFile, alignedSize = entry
     print(nameFile)
     tempDir = os.path.join(fDir, nameFile)
     
     tempfile = open(tempDir, 'rb')
     data = tempfile.read(sizeFile)
     dumpfile.write(data)
+    dumpfile.write(b'\x00' * (alignedSize - sizeFile))
     tempfile.close()
     
 

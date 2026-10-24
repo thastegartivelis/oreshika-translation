@@ -126,7 +126,7 @@ class Parser():
                 byte = datfile.read(1)
                 byte1 = datfile.read(1)
 
-                if byte == '' or byte1 == '' or ord(byte) == 0 and ord (byte1) == 0:
+                if byte == '' or byte1 == '' or len(byte) == 0 or len(byte1) == 0 or ord(byte) == 0 and ord (byte1) == 0:
                     flag = 0
                     
             textSize = len(text)
@@ -161,9 +161,9 @@ class Parser():
 ###############################################################################
     def OnSave(self,filename):
         # Get file name
-
         saveFileName = filename.split('.')[0]+ "_new.mlb"
           
+        print('attempting save ' + saveFileName)
         dumpFile = open(saveFileName, 'wb')
 
         # Write header for file
@@ -262,6 +262,11 @@ for entry in os.listdir('data'):
                 parser = Parser()
                 parser.OnOpen(os.path.join('data', entry, 'Uncompressed', file), substitutions.get(entry).get(file))
                 parser.OnSave(os.path.join('data', entry, 'Uncompressed', file))
+        for file in os.listdir(os.path.join('data', entry, 'Raw')):
+            if file in translateFiles:
+                parser = Parser()
+                parser.OnOpen(os.path.join('data', entry, 'Raw', file), substitutions.get(entry).get(file))
+                parser.OnSave(os.path.join('data', entry, 'Raw', file))
 if 'MLB_0025.mlb' in translateFiles:
     parser = Parser()
     parser.OnOpen(os.path.join('data', 'MLB_0025.mlb'), substitutions.get('None').get('MLB_0025.mlb'))

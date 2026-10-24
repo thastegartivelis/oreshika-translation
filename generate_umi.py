@@ -1,5 +1,5 @@
 import os
-import math
+import csv
 
 def get_file_list(base_dir):
     """
@@ -20,6 +20,7 @@ def get_file_list(base_dir):
                 "rel_path": rel_path,
                 "size": file_size
             })
+    file_list.sort(key=lambda item: item["rel_path"].casefold())
     return file_list
 
 def write_umi_header(umi_file_path):
@@ -73,27 +74,32 @@ def create_ufl(ufl_file_path, input_dir):
         "{isopath}", "{pcpath}", {sector}, {size}
     Where isopath = path relative to ISO root (/PSP_GAME/), pcpath = absolute file path.
     
-    Sector tracking: We maintain cumulative sector counter starting at 52767 (UMD offset where USER volume begins).
-    Each file's sector count is the CURRENT position, which advances after each entry.
+    Sector locations come from umd_layout.csv, which records the extents
+    observed in the original ISO. UMDGen relocates two boot files whose
+    original extents are before its user-data area.
     """
     files = get_file_list(input_dir)
-    # Sort files to ensure consistent sector mapping (alphabetical by path)
-    # Sort files to ensure consistent sector mapping (alphabetical by rel_path)
+    sector_map = {}
+    with open("umd_layout.csv", newline="") as layout_file:
+        for row in csv.DictReader(layout_file):
+            sector_map[row["path"]] = int(row["sector"])
 
-    current_sector = 52767  # UMD volume start offset for contiguous data + metadata
+    file_paths = {item["rel_path"] for item in files}
+    missing = file_paths - sector_map.keys()
+    stale = sector_map.keys() - file_paths
+    if missing or stale:
+        raise ValueError(f"UMD layout mismatch; missing={sorted(missing)}, stale={sorted(stale)}")
+
+    files.sort(key=lambda item: sector_map[item["rel_path"]])
 
     with open(ufl_file_path, 'w') as f:
         for item in files:
             rel_path = item['rel_path'].split('PSP_Game/')[1]
             file_size = item['size']
             full_path = item['full_path']
-            # Sector calculation: (size - (size % 2048)) / 2048 = sectors to consume
-            sector_count = math.ceil(file_size / 2048)
+            sector = sector_map[item['rel_path']]
 
-            # Write line with format "relpath" "absolutepath" CURRENT_SECTOR SIZE
-            f.write(f'"/PSP_GAME/{rel_path}", "{full_path}", {current_sector}, {file_size},\n')
-
-            current_sector += sector_count  # Advance to next sector for following file
+            f.write(f'"/PSP_GAME/{rel_path}", "{full_path}", {sector}, {file_size},\n')
 
 if __name__ == "__main__":
     # Configuration
