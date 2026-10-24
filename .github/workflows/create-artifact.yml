@@ -8,6 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Run the Docker build
         id: build
         run: echo "filename=$(docker run --name builder thastegartivelis/oreshika-builder)" >> $GITHUB_OUTPUT
