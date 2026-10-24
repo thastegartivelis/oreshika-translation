@@ -5,3 +5,5 @@ Rebuilt game
 *.txt
 *.csv
 blueprint*
+output/
+umdgenc.exe
