@@ -4,24 +4,27 @@ on:
   workflow_dispatch:
 
 jobs:
-  docker-job:
+  publish-patch:
     runs-on: ubuntu-latest
 
     steps:
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Run the Docker build
         id: build
-        run: echo "filename=$(docker run --name builder thastegartivelis/oreshika-builder)" >> $GITHUB_OUTPUT
+        run: docker run --name builder thastegartivelis/oreshika-builder
+      - name: Get filename
+        id: filename
+        run: echo "filename=$(docker logs builder)" >> $GITHUB_OUTPUT
       - name: Get the patch
-        run: docker cp builder:${{ steps.build.outputs.filename }} ${{ steps.build.outputs.filename }}
+        run: docker cp builder:${{ steps.filename.outputs.filename }} ${{ steps.filename.outputs.filename }}
       - name: Upload patch
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ steps.build.outputs.filename }}
-          path: ${{ steps.build.outputs.filename }}
+          name: ${{ steps.filename.outputs.filename }}
+          path: ${{ steps.filename.outputs.filename }}
           compression-level: 0
 
