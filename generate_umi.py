@@ -42,7 +42,8 @@ def write_umi_header(umi_file_path):
         f.write(f"FORCE16SECTOR=0\n")
         f.write(f"LAYER_TRP=0\n")
         # The .ufl file is the same name as .umi but with .ufl extension
-        ufl_path = umi_file_path.replace(".umi", ".ufl")
+        # The path should be relative to the directory of the .umi file.
+        ufl_path = os.path.basename(umi_file_path).replace(".umi", ".ufl")
         f.write(f"FILE_LIST={ufl_path}\n")
         f.write(f"BOOT=0\n")
         f.write(f"UPDATE=1\n")
@@ -88,10 +89,10 @@ def create_ufl(ufl_file_path, input_dir):
 if __name__ == "__main__":
     # Configuration
     # The input_dir is the folder containing the files we want to pack
-    input_dir = "/mnt/c/Users/jeff's 2021 pc/workspace/decomp/oreshika/oreshika-translation/Rebuilt game"
+    input_dir = "oreshika-translation/Rebuilt game"
     # The .umi and .ufl files will be created in the oreshika-translation folder
-    umi_path = "/mnt/c/Users/jeff's 2021 pc/workspace/decomp/oreshika/oreshika-translation/blueprint.umi"
-    ufl_path = "/mnt/c/Users/jeff's 2021 pc/workspace/decomp/oreshika/oreshika-translation/blueprint.ufl"
+    umi_path = "oreshika-translation/blueprint.umi"
+    ufl_path = "oreshika-translation/blueprint.ufl"
 
     print(f"Generating {umi_path}...")
     write_umi_header(umi_path)
