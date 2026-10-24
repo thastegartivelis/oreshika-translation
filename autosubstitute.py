@@ -77,7 +77,7 @@ class Parser():
 
             byte = datfile.read(1)
 
-            if byte == '\xFF':
+            if byte == b'\xFF':
                 self.fFFList.append('1')
             else:
                 self.fFFList.append('0')
@@ -85,7 +85,7 @@ class Parser():
         datfile.seek(fileSize-1)
         byte = datfile.read(1)
 
-        if byte == '\xFF':
+        if byte == b'\xFF':
             self.fFFList.append('1')
         else:
             self.fFFList.append('0')
@@ -205,8 +205,8 @@ class Parser():
                 location = location + 1
 
             if self.fFFList[header] == '1':
-                subData.append('\xFF')
-                subData.append('\xFF')
+                subData.append(b'\xFF')
+                subData.append(b'\xFF')
                    
             dataList.append(subData)
             dataPointers.append(offsetArray)
