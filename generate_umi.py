@@ -37,39 +37,32 @@ def write_umi_header(umi_file_path):
     
     with open(umi_file_path, 'w') as f:
         f.write("[SYS]\n")
-        f.write(f"VERSION=1.00\n")
-        f.write(f"APPLICATION=PSP GAME\n")
-        f.write(f"LAYER_STRUCT=SINGLE\n")
+        f.write(f"VERSION=\"1.00\"\n")
+        f.write(f"APPLICATION=\"PSP GAME\"\n")
+        f.write(f"LAYER_STRUCT=\"SINGLE\"\n")
         f.write(f"FORCE16SECTOR=0\n")
         f.write(f"LAYER_TRP=0\n")
         # The .ufl file is the same name as .umi but with .ufl extension
         ufl_path = os.path.basename(umi_file_path).replace(".umi", ".ufl")
-        f.write(f"FILE_LIST={ufl_path}\n")
+        f.write(f"FILE_LIST=\"{ufl_path}\"\n")
         
-        if os.path.basename(umi_file_path) == 'blueprint.umi':
-            # For production blueprint: BOOT=0 (matching original successful build)
-            # UMDGen reads boot image from standard location when BOOT=0
-            f.write(f"BOOT=0\n")
-            f.write(f"UPDATE=1\n")
-        else:
-            # Fallback for other umi files
-            f.write(f"BOOT=0\n")
-            f.write(f"UPDATE=1\n")
-            f.write(f"CRASH_BOOT_FILE=1\n")
+        f.write(f"BOOT=0\n")
+        f.write(f"UPDATE=1\n")
+        f.write(f"CRASH_BOOT_FILE=1\n")
         f.write("[/SYS]\n\n")
 
         f.write("[MDI]\n")
-        f.write(f"DISCNAME={disc_id}\n")
-        f.write(f"PRODUCER=Gart\n")
-        f.write(f"COPYRIGHT=xxx\n")
-        f.write(f"REGION_CODE=WW\n")
+        f.write(f"DISCNAME=\"{disc_id}\"\n")
+        f.write(f"PRODUCER=\"Gart\"\n")
+        f.write(f"COPYRIGHT=\"xxx\"\n")
+        f.write(f"REGION_CODE=\"WW\"\n")
         f.write("[/MDI]\n\n")
 
         f.write("[VOL]\n")
-        f.write(f"VOLUME=Oreshika\n")
-        f.write(f"PUBLISHER=Gart\n")
-        f.write(f"VOLUME SET=\n")
-        f.write(f"DATA PREPARER=Gart\n")
+        f.write(f"VOLUME=\"Oreshika\"\n")
+        f.write(f"PUBLISHER=\"Gart\"\n")
+        f.write(f"VOLUME SET=\"\"\n")
+        f.write(f"DATA PREPARER=\"Gart\"\n")
         f.write("[/VOL]\n\n")
 
 def create_ufl(ufl_file_path, input_dir):
@@ -86,20 +79,19 @@ def create_ufl(ufl_file_path, input_dir):
     files = get_file_list(input_dir)
     # Sort files to ensure consistent sector mapping (alphabetical by path)
     # Sort files to ensure consistent sector mapping (alphabetical by rel_path)
-    files.sort(key=lambda x: x['rel_path'])
 
     current_sector = 52767  # UMD volume start offset for contiguous data + metadata
 
     with open(ufl_file_path, 'w') as f:
         for item in files:
-            rel_path = item['rel_path']
+            rel_path = item['rel_path'].split('PSP_Game/')[1]
             file_size = item['size']
             full_path = item['full_path']
             # Sector calculation: (size - (size % 2048)) / 2048 = sectors to consume
             sector_count = math.ceil(file_size / 2048)
 
             # Write line with format "relpath" "absolutepath" CURRENT_SECTOR SIZE
-            f.write(f'"{rel_path}", "{full_path}", {current_sector}, {file_size}\n')
+            f.write(f'"/PSP_GAME/{rel_path}", "{full_path}", {current_sector}, {file_size},\n')
 
             current_sector += sector_count  # Advance to next sector for following file
 
