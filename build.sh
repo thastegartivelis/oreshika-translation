@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-TOTAL_STEPS=11
+TOTAL_STEPS=12
 CURRENT_STEP=0
 LAST_PERCENT=0
 # Latest measured durations with about 10% headroom, in seconds.
-STAGE_ESTIMATES=(1 1 24 2 11 55 1 1 1 15 15)
+STAGE_ESTIMATES=(1 1 24 2 11 55 1 1 1 15 15 7)
 STAGE_LABELS=()
 STAGE_ACTUALS=()
 TOTAL_ESTIMATE=0
@@ -122,7 +122,7 @@ run_step() {
 }
 
 run_step "Fetch translations" curl -fsSL "https://docs.google.com/spreadsheets/d/1WGbyOT_U6ErMef8GOxGm7yQcT9sqpaA6POoba4LsbTA/export?gid=973457807&format=csv" -o translations.csv
-run_step "Warn about title text limits" --show-output python3 ../research/decompilation/scripts/MeasureGameTextWidths.py translations.csv --warn-limits
+run_step "Warn about title text limits" --show-output python3 MeasureGameTextWidths.py translations.csv --warn-limits
 run_step "Remove old extracted data" rm -rf data
 run_step "Copy original data pack" cp "Original game/PSP_Game/USRDIR/data.ore" .
 run_step "Unpack data pack" python3 data.ore_unpack_v1.py
@@ -132,6 +132,7 @@ run_step "Compress translated text" python3 MLB_compress_v1.py
 run_step "Pack game archives" python3 EZBIND_Pack_v2.py
 run_step "Repack data pack" python3 data.ore_pack_v2.py
 run_step "Generate patched ISO" bash -c 'mv data_new.ore "Rebuilt game/PSP_Game/USRDIR/data.ore" && ./umdgenc_cli.sh'
+run_step "Create xdelta" bash -c "../xdelta/xdelta.exe -e -s ../Ore_no_Shikabane_wo_Koete_Yuke_JPN_PSP-Caravan.iso patched.iso diff-$(date -u +%Y-%m-%d).xdelta"
 
 printf 'Build complete.\n'
 printf 'Stage durations (seconds):\n'
