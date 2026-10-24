@@ -89,7 +89,13 @@ for folder in translateFolders:
         if len(fList) == 0:
             continue
 
-        fDataOffsetCounter = fList[0][3]
+        # The rebuilt filename table can end at a different position from the
+        # original one. Preserve the original first data offset when it still
+        # leaves enough room; otherwise start at the next 4-byte boundary.
+        nameTableEnd = 16 + fnum * 16 + sum(len(entry[0].encode('utf8')) + 1 for entry in fList)
+        alignedNameTableEnd = (nameTableEnd + 3) & ~3
+        firstDataOffset = max(fList[0][3], alignedNameTableEnd)
+        fDataOffsetCounter = firstDataOffset
 
         for entry in fList:
             fName, fNameOffset, fSize, fDataOffset, fCRC =  entry
@@ -149,9 +155,10 @@ for folder in translateFolders:
             dumpfile.write(fName.encode('utf8'))
             dumpfile.write(b'\x00')
     
-        dumpfile.write(b'\x00')
-        dumpfile.write(b'\x00')
-        dumpfile.write(b'\x00')
+        prefixPadding = firstDataOffset - dumpfile.tell()
+        if prefixPadding < 0:
+            raise ValueError("Rebuilt filename table overlaps the first file payload")
+        dumpfile.write(b'\x00' * prefixPadding)
 
         # Dump files in new EZBIND
         for entry in fEZBIND:
