@@ -6,13 +6,12 @@
 
 # Current Directory
 ROOT_DIR=$(pwd)
-TRANSLATION_DIR="oreshika-translation"
-INPUT_DIR="$TRANSLATION_DIR/Rebuilt game"
+INPUT_DIR="Rebuilt game"
 OUTPUT_DIR="output"
 
 # Paths to files
-UMI_PATH="$TRANSLATION_DIR/blueprint.umi"
-UFL_PATH="$TRANSLATION_DIR/blueprint.ufl"
+UMI_PATH="blueprint.umi"
+UFL_PATH="blueprint.ufl"
 
 # Check if input directory exists
 if [ ! -d "$INPUT_DIR" ]; then
@@ -21,7 +20,7 @@ if [ ! -d "$INPUT_DIR" ]; then
 fi
 
 echo "Step 1: Generating blueprint.umi and blueprint.ufl..."
-python3 "$TRANSLATION_DIR/generate_umi.py"
+python3 "generate_umi.py"
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to generate blueprints."
@@ -30,11 +29,14 @@ fi
 
 echo "Step 2: Running umdgenc.exe to generate ISO images..."
 # We use the absolute path to umdgenc.exe to ensure it's found correctly.
-./chovy/umdgenc.exe /g "$UMI_PATH" "$OUTPUT_DIR"
+./umdgenc.exe /g "$UMI_PATH" "$OUTPUT_DIR"
 
 if [ $? -eq 0 ]; then
-    echo "Success: ISO images generated in $OUTPUT_DIR."
+	:
 else
     echo "Error: umdgenc.exe failed to generate images."
     exit 1
 fi
+
+echo "pulling out patch"
+cp "$OUTPUT_DIR/USER_L0.IMG" patched.iso
