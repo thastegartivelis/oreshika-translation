@@ -34,14 +34,18 @@ jobs:
       - name: Get filename
         id: filename
         run: echo "filename=$(docker logs builder)" >> $GITHUB_OUTPUT
-      - name: Get the patch
-        run: docker cp builder:/${{ steps.filename.outputs.filename }} ./${{ steps.filename.outputs.filename }}
+      - name: Pull out information from docker run
+        id: docker-info
+        run: |
+          docker cp builder:/${{ steps.filename.outputs.filename }} ./${{ steps.filename.outputs.filename }}
+          docker cp builder:/translations.csv ./translations.csv
+          echo "image=$(docker images -q thastegartivelis/oreshika-builder)" >> $GITHUB_OUTPUT
       - name: Check for file changes via cache
         id: cache-check
         uses: actions/cache@v6
         with:
           path: .hash-cache-placeholder
-          key: hash-${{ hashFiles(steps.filename.outputs.filename) }}
+          key: hash-${{ steps.docker-info.outputs.image }}-${{ hashFiles('./translations.csv') }}
       - name: Create hash file
         if: steps.cache-check.outputs.cache-hit != 'true'
         run: |

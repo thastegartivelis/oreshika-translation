@@ -132,7 +132,7 @@ run_step "Compress translated text" python3 MLB_compress_v1.py
 run_step "Pack game archives" python3 EZBIND_Pack_v2.py
 run_step "Repack data pack" python3 data.ore_pack_v2.py
 run_step "Generate patched ISO" bash -c 'mv data_new.ore "Rebuilt game/PSP_Game/USRDIR/data.ore" && ./umdgenc_cli.sh'
-run_step "Create xdelta" bash -c "../xdelta/xdelta.exe -e -s ../Ore_no_Shikabane_wo_Koete_Yuke_JPN_PSP-Caravan.iso patched.iso diff-$(date -u +%Y-%m-%d).xdelta"
+run_step "Create xdelta" bash -c "../xdelta/xdelta.exe -e -s ../Ore_no_Shikabane_wo_Koete_Yuke_JPN_PSP-Caravan.iso patched.iso diff-$(date -u +%Y-%m-%dT%H%M%SZ).xdelta"
 
 printf 'Build complete.\n'
 printf 'Stage durations (seconds):\n'
