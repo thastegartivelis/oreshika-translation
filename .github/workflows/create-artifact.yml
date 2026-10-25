@@ -26,25 +26,12 @@ jobs:
         run: echo "filename=$(docker logs builder)" >> $GITHUB_OUTPUT
       - name: Get the patch
         run: docker cp builder:/${{ steps.filename.outputs.filename }} ./${{ steps.filename.outputs.filename }}
-      - name: Create Git Tag via API
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const tagName = '${{ steps.date.outputs.date }}'; // Define your tag name here
-            const sha = context.sha;   // Targets the commit SHA that triggered the workflow
-
-            try {
-              await github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `refs/tags/${tagName}`,
-                sha: sha
-              });
-              console.log(`Successfully created tag ${tagName} on SHA ${sha}`);
-            } catch (error) {
-              console.error(`Failed to create tag: ${error.message}`);
-              core.setFailed(error.message);
-            }
+      - name: Create tag
+        run: |
+          git init
+          git commit --allow-empty -m "empty commit"
+          git tag v${{ steps.date.outputs.date }}
+          git push origin v${{ steps.date.outputs.date }}
       - name: Release patch
         uses: softprops/action-gh-release@v3
         with:
