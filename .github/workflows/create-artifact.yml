@@ -46,7 +46,7 @@ jobs:
         if: steps.cache-check.outputs.cache-hit != 'true'
         run: |
           mkdir -p .hash-cache-placeholder
-          touch .hache-cache-placeholder/file
+          touch .hash-cache-placeholder/file
       - name: Create tag
         if: steps.cache-check.outputs.cache-hit != 'true'
         run: |
